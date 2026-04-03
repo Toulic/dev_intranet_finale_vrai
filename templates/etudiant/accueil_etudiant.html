@@ -1,0 +1,38 @@
+{% extends 'commun/base.html' %}
+{% block content %}
+    <div class="card">
+        <div class="card-header">Dernières évaluations</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Matière</th>
+                    <th>Note / 20</th>
+                    <th>Coefficient</th>
+                    <th>Commentaire</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for note in notes %}
+                <tr>
+                    <td><strong>{{ note.matiere }}</strong></td>
+                    <td style="color: #008148; font-weight: bold; font-size: 1.1rem;">{{ note.valeur }}</td>
+                    <td>1.0</td>
+                    <td style="font-style: italic; color: #777;">Travail sérieux</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center; color: #888;">Aucune note pour le moment.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">Moyenne Générale</div>
+        <p style="font-size: 2rem; margin: 0; color: var(--pronote-green);">
+            {{ moyenne }} 
+            {% if moyenne != 'N/A' %}<span style="font-size: 1rem; color: #999;">/ 20</span>{% endif %}
+        </p>
+    </div>
+{% endblock %}

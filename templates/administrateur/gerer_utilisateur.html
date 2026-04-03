@@ -1,0 +1,71 @@
+{% extends 'commun/base.html' %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">Modifier l'utilisateur : {{ user_to_edit.username }}</div>
+    
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div style="margin-bottom: 15px;">
+            <label>Nom d'utilisateur :</label><br>
+            <input type="text" name="username" value="{{ user_to_edit.username }}" required 
+                   style="width: 100%; padding: 8px; margin-top: 5px;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label>Rôle :</label><br>
+            <select name="role_id" style="width: 100%; padding: 8px; margin-top: 5px;">
+                {% for r in roles %}
+                <option value="{{ r.id }}" {% if r.id == user_to_edit.role_id %}selected{% endif %}>
+                    {{ r.nom }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="classe_id" class="form-label">Classe (pour les étudiants) :</label>
+            <select class="form-select" id="classe_id" name="classe_id">
+                <option value="">-- Aucune classe --</option>
+                {% for classe in classes %}
+                    <option value="{{ classe.id }}" {% if user_to_edit.classe_id == classe.id %}selected{% endif %}>
+                        {{ classe.nom }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="submit" name="action" value="modifier" 
+                    style="background: var(--pronote-green); color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px;">
+                Enregistrer les modifications
+            </button>
+            
+            <button type="submit" name="action" value="supprimer" 
+                    onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');"
+                    style="background: #e74c3c; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px;">
+                Supprimer l'utilisateur
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="card" style="margin-top: 30px; border-top: 3px solid #f1c40f;">
+    <div class="card-header" style="color: #d35400; border-bottom-color: #f1c40f;">Réinitialiser le mot de passe</div>
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div style="margin-bottom: 15px;">
+            <label>Nouveau mot de passe pour l'utilisateur :</label><br>
+            <input type="password" name="nouveau_mdp" placeholder="Minimum 6 caractères" required 
+                   style="width: 100%; padding: 8px; margin-top: 5px;">
+        </div>
+        <button type="submit" name="action" value="changer_mdp" 
+                style="background: #f1c40f; color: #333; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-weight: bold;">
+            Forcer le nouveau mot de passe
+        </button>
+    </form>
+</div>
+
+<div style="margin-top: 20px;">
+    <a href="{{ url_for('admin_dashboard') }}">⬅️ Retour au tableau de bord</a>
+</div>
+{% endblock %}

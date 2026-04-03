@@ -1,0 +1,124 @@
+{% extends 'commun/base.html' %}
+{% block content %}
+<style>
+    /* Centrage parfait de la page de connexion */
+    .login-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        background-color: var(--pronote-light);
+    }
+    
+    .login-container { 
+        width: 100%;
+        max-width: 420px; 
+        background: white; 
+        border-radius: 12px; 
+        overflow: hidden; 
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    
+    .login-header { 
+        background: linear-gradient(135deg, var(--pronote-green), #005a32); 
+        color: white; 
+        padding: 30px 20px; 
+        text-align: center; 
+    }
+    
+    .login-header h2 {
+        margin: 0 0 10px 0;
+        font-size: 1.8rem;
+    }
+    
+    .login-header p {
+        margin: 0;
+        opacity: 0.8;
+        font-size: 0.9rem;
+    }
+    
+    .login-body { 
+        padding: 40px 30px; 
+    }
+    
+    .form-group { 
+        margin-bottom: 20px; 
+    }
+    
+    .form-group label { 
+        display: block; 
+        margin-bottom: 8px; 
+        color: #444; 
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .form-group input { 
+        width: 100%; 
+        padding: 12px 15px; 
+        border: 2px solid #eee; 
+        border-radius: 6px; 
+        box-sizing: border-box; 
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
+    
+    .form-group input:focus {
+        border-color: var(--pronote-green);
+        outline: none;
+    }
+    
+    .btn-login { 
+        width: 100%; 
+        padding: 14px; 
+        background: var(--pronote-green); 
+        color: white; 
+        border: none; 
+        border-radius: 6px; 
+        font-weight: bold; 
+        font-size: 1.1rem;
+        cursor: pointer; 
+        transition: background 0.3s;
+        margin-top: 10px;
+    }
+    
+    .btn-login:hover {
+        background: #006638;
+    }
+    
+    .login-footer {
+        text-align: center;
+        padding: 20px;
+        background: #f9f9f9;
+        color: #777;
+        font-size: 0.85rem;
+        border-top: 1px solid #eee;
+    }
+</style>
+
+<div class="login-wrapper">
+    <div class="login-container">
+        <div class="login-header">
+            <h2>Portail Académique</h2>
+            <p>Campus GCS2 - Authentification</p>
+        </div>
+        <div class="login-body">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    <label>Identifiant utilisateur</label>
+                    <input type="text" name="username" placeholder="Ex: eleve_a ou prof_maths" required autofocus>
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <input type="password" name="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-login">Se connecter</button>
+            </form>
+        </div>
+        <div class="login-footer">
+            Accès strictement réservé au personnel et aux étudiants.
+        </div>
+    </div>
+</div>
+{% endblock %}

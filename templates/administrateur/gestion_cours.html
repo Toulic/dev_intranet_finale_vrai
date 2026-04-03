@@ -1,0 +1,53 @@
+{% extends 'commun/base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow mb-5">
+        <div class="card-header bg-dark text-white d-flex align-items-center">
+            <i class="fas fa-file-pdf me-2"></i>
+            <h5 class="mb-0">Gestion globale des cours (Admin)</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Vue d'ensemble de tous les supports pédagogiques déposés sur la plateforme.</p>
+            <hr>
+            
+            {% if documents %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Titre du cours</th>
+                            <th>Auteur (Professeur)</th>
+                            <th>Classe cible</th>
+                            <th>Date de publication</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doc in documents %}
+                        <tr>
+                            <td><strong>{{ doc.nom_affichage }}</strong></td>
+                            <td>{{ doc.prof_nom }}</td>
+                            <td><span class="badge bg-secondary">{{ doc.classe_nom }}</span></td>
+                            <td>{{ doc.date_depot.strftime('%d/%m/%Y à %H:%M') }}</td>
+                            <td class="text-end">
+                                <form action="{{ url_for('admin_delete_pdf', doc_id=doc.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Confirmer la suppression définitive de ce document ?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        Supprimer
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-light text-center mb-0 border">
+                <span class="text-muted">Aucun cours n'a encore été publié sur la plateforme.</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

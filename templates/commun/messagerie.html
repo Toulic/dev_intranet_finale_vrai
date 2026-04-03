@@ -1,0 +1,258 @@
+{% extends 'commun/base.html' %}
+{% block content %}
+<style>
+    /* Conteneur principal qui prend toute la hauteur disponible */
+    .messaging-container {
+        display: flex;
+        height: calc(100vh - 160px);
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .unread-dot {
+        background-color: #22c55e;
+        color: white;
+        font-size: 0.75rem;
+        font-weight: bold;
+        padding: 2px 8px;
+        border-radius: 12px;
+        margin-left: 8px;
+        box-shadow: 0 0 8px rgba(34, 197, 94, 0.5); /* Le petit effet de fond doux */
+        display: inline-block;
+    }
+    /* BARRE LATÉRALE : Liste des contacts */
+    .contacts-sidebar {
+        width: 300px;
+        border-right: 1px solid #eee;
+        display: flex;
+        flex-direction: column;
+        background: #fdfdfd;
+    }
+    .sidebar-search {
+        padding: 15px;
+        background: #f5f5f5;
+        border-bottom: 1px solid #eee;
+    }
+    .sidebar-search input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        box-sizing: border-box;
+    }
+    .contacts-list {
+        flex: 1;
+        overflow-y: auto;
+    }
+    .contact-card {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        display: block;
+        text-decoration: none;
+        color: #333;
+        transition: background 0.2s;
+    }
+    .contact-card:hover { background: #f0f7f0; }
+    .contact-card.active { background: #e8f5e9; border-left: 4px solid #008148; }
+
+    /* ZONE DE CHAT */
+    .chat-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #fafafa;
+    }
+    .chat-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
+        background: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    .chat-history {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    /* BULLES DE MESSAGE */
+    .message-bubble {
+        max-width: 65%;
+        padding: 12px 18px;
+        border-radius: 20px;
+        font-size: 0.95rem;
+        line-height: 1.4;
+        position: relative;
+    }
+    .message-sent {
+        align-self: flex-end;
+        background: #008148;
+        color: white;
+        border-bottom-right-radius: 2px;
+        box-shadow: 0 2px 4px rgba(0,129,72,0.2);
+    }
+    .message-received {
+        align-self: flex-start;
+        background: white;
+        color: #333;
+        border: 1px solid #eee;
+        border-bottom-left-radius: 2px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    /* FOOTER / INPUT */
+    .chat-footer {
+        padding: 15px 20px;
+        background: white;
+        border-top: 1px solid #eee;
+    }
+    .message-form {
+        display: flex;
+        gap: 10px;
+    }
+    .message-form input {
+        flex: 1;
+        padding: 12px 20px;
+        border: 1px solid #ccc;
+        border-radius: 25px;
+        outline: none;
+        font-size: 0.95rem;
+    }
+    .message-form input:focus {
+        border-color: #008148;
+    }
+    .send-btn {
+        background: #008148;
+        color: white;
+        border: none;
+        padding: 0 25px;
+        border-radius: 25px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .send-btn:hover { background: #006b3c; }
+
+    .empty-state {
+        margin: auto;
+        text-align: center;
+        color: #999;
+    }
+    .message-info {
+        display: block;
+        font-size: 0.7rem;
+        margin-top: 5px;
+        opacity: 0.7;
+        text-align: right;
+    }
+</style>
+
+<div class="messaging-container">
+    <aside class="contacts-sidebar">
+        <div class="sidebar-search">
+            <input type="text" placeholder="Rechercher un contact...">
+        </div>
+        <div class="contacts-list">
+            {% for c in contacts %}
+            <a href="{{ url_for('messagerie', contact_id=c.id) }}" class="contact-card {% if contact_id == c.id %}active{% endif %}">
+                <div style="font-weight: bold; font-size: 1.05rem; margin-bottom: 3px;">
+                    {{ c.username }}
+                    {% if c.non_lus and c.non_lus > 0 %}
+                        <span class="unread-dot">{{ c.non_lus | int }}</span>
+                    {% endif %}
+                </div>
+                <div style="font-size: 0.8rem; color: #888;">
+                    {{ '🛡️ Administrateur' if c.role_id == 1 else '👨‍🏫 Professeur' if c.role_id == 2 else '👨‍🎓 Élève' }}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </aside>
+
+    <main class="chat-area">
+        {% if selected_contact %}
+            <div class="chat-header">
+                Conversation avec {{ selected_contact.username }}
+            </div>
+            
+            <div class="chat-history" id="chatHistory">
+                {% for m in conversation %}
+                    <div class="message-bubble {% if m.expediteur_id == session.user_id %}message-sent{% else %}message-received{% endif %}">
+                        {{ m.contenu }}
+                        <span class="message-info">
+                            {% if m.date_envoi %} {{ m.date_envoi.strftime('%H:%M') }} {% endif %}
+                        </span>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <p>Aucun message avec {{ selected_contact.username }}.</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="chat-footer">
+                <form class="message-form" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="hidden" name="destinataire_id" value="{{ contact_id }}"/>
+                    <input type="text" name="message" id="message" placeholder="Votre message..." required autocomplete="off">
+                    <button type="submit" class="send-btn">Envoyer</button>
+                </form>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div style="font-size: 3rem;">✉️</div>
+                <h3>Messagerie PRONOTE</h3>
+                <p>Sélectionnez un contact pour discuter.</p>
+            </div>
+        {% endif %}
+    </main>
+</div>
+
+<script>
+    // 1. Fait défiler la conversation tout en bas au chargement
+    function scrollToBottom() {
+        var objDiv = document.getElementById("chatHistory");
+        if (objDiv) { objDiv.scrollTop = objDiv.scrollHeight; }
+    }
+    window.onload = scrollToBottom;
+
+    // 2. BARRE DE RECHERCHE EN TEMPS RÉEL
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('.sidebar-search input');
+        const contactCards = document.querySelectorAll('.contact-card');
+
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            contactCards.forEach(function(card) {
+                const username = card.querySelector('div').textContent.toLowerCase();
+                if (username.includes(searchTerm)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // 3. RAFRAICHISSEMENT AUTOMATIQUE INTELLIGENT
+    setInterval(function() {
+        let zoneDeMessage = document.getElementById('message');
+        let zoneDeRecherche = document.querySelector('.sidebar-search input');
+        
+        // On vérifie si tu as cliqué dans la zone de message ou de recherche
+        let ecritMessage = (zoneDeMessage && document.activeElement === zoneDeMessage);
+        let ecritRecherche = (zoneDeRecherche && document.activeElement === zoneDeRecherche);
+        
+        // Si tu n'es ni en train de chercher, ni en train d'écrire un message, on actualise
+        if (!ecritMessage && !ecritRecherche) {
+            window.location.reload();
+        }
+    }, 5000);
+</script>
+
+{% endblock %}

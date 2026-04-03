@@ -1,0 +1,63 @@
+{% extends 'commun/base.html' %}
+{% block content %}
+<div style="max-width: 500px; margin: 40px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    
+    <h2 style="text-align: center; color: #333; margin-bottom: 20px;">Mon Profil</h2>
+    <p style="text-align: center; color: #666; margin-bottom: 30px;">
+        Connecté en tant que : <strong>{{ session.username }}</strong>
+    </p>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert-{{ category }}" style="padding: 10px; margin-bottom: 20px; border-radius: 5px;">
+            {{ message }}
+          </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+    <style>
+        /* Vert pour le succès */
+        .alert-success { 
+            background-color: #d4edda; 
+            color: #155724; 
+            border: 1px solid #c3e6cb;
+        }
+        /* Rouge pour les erreurs (ancien mdp faux, etc.) */
+        .alert-danger { 
+            background-color: #f8d7da; 
+            color: #721c24; 
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+
+    <form method="POST" action="{{ url_for('profil') }}" style="display: flex; flex-direction: column; gap: 15px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        <div>
+            <label style="font-weight: bold; font-size: 0.9rem; color: #444;">Ancien mot de passe</label>
+            <input type="password" name="ancien_mdp" required 
+                   style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+
+        <div>
+            <label style="font-weight: bold; font-size: 0.9rem; color: #444;">Nouveau mot de passe</label>
+            <input type="password" name="nouveau_mdp" required 
+                   style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
+        </div>
+
+        <div>
+            <label style="font-weight: bold; font-size: 0.9rem; color: #444;">Confirmer le nouveau mot de passe</label>
+            <input type="password" name="confirmation_mdp" required 
+                   style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
+        </div>
+
+        <button type="submit" style="background: #008148; color: white; border: none; padding: 12px; border-radius: 5px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 10px;">
+            Mettre à jour mon mot de passe
+        </button>
+    </form>
+</div>
+{% endblock %}

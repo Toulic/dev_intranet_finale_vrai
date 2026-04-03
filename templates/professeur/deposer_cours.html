@@ -1,0 +1,86 @@
+{% extends 'commun/base.html' %}
+{% block content %}
+<div class="container mt-4"> <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+            <i class="fas fa-upload me-2"></i>
+            <h5 class="mb-0">Espace de dépôt des cours (PDF)</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Sélectionnez une classe et un fichier PDF pour mettre vos supports à disposition des élèves.</p>
+            <hr>
+            <form action="{{ url_for('upload_pdf') }}" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="mb-3">
+                    <label class="form-label font-weight-bold">Titre du cours</label>
+                    <input type="text" name="nom_cours" class="form-control" placeholder="Ex: Introduction à la cryptographie" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label font-weight-bold">Classe de destination</label>
+                    <select name="classe_id" class="form-select" required>
+                        <option value="" selected disabled>Choisir une classe...</option>
+                        <option value="1">GCS2-A</option>
+                        <option value="2">GCS2-B</option>
+                        <option value="3">GCS2-C</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label font-weight-bold">Fichier (Format PDF uniquement)</label>
+                    <input type="file" name="file" class="form-control" accept=".pdf" required>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success px-5">Publier le cours</button>
+                    <a href="{{ url_for('prof_dashboard') }}" class="btn btn-outline-secondary">Annuler</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow mt-4 mb-5">
+        <div class="card-header bg-secondary text-white d-flex align-items-center">
+            <i class="fas fa-list me-2"></i>
+            <h5 class="mb-0">Mes cours publiés</h5>
+        </div>
+        <div class="card-body">
+            {% if documents %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Titre du cours</th>
+                            <th>Destiné à</th>
+                            <th>Date de publication</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doc in documents %}
+                        <tr>
+                            <td><strong>{{ doc.nom_affichage }}</strong></td>
+                            <td><span class="badge bg-info text-dark">{{ doc.classe_nom }}</span></td>
+                            <td>{{ doc.date_depot.strftime('%d/%m/%Y à %H:%M') }}</td>
+                            <td class="text-end">
+                                <form action="{{ url_for('delete_pdf', doc_id=doc.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce cours définitivement ?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        Supprimer
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-light text-center mb-0 border">
+                <span class="text-muted">Vous n'avez pas encore publié de cours.</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div> {% endblock %}

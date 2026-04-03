@@ -1,0 +1,30 @@
+{% extends "commun/base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">📚 Mes supports de cours</h2>
+
+    <div class="row">
+        {% if documents %}
+            {% for doc in documents %}
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-file-pdf fa-3x text-danger mb-3"></i>
+                        <h5 class="card-title">{{ doc.nom_affichage }}</h5>
+                        <p class="card-text text-muted">
+                            <small>Par : {{ doc.prof_nom }}<br>Le : {{ doc.date_depot.strftime('%d/%m/%Y') }}</small>
+                        </p>
+                        <a href="{{ url_for('static', filename='uploads/cours/' + doc.nom_fichier) }}" 
+                           class="btn btn-outline-primary" target="_blank">
+                            <i class="fas fa-download"></i> Consulter le PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-info">Aucun cours n'est disponible pour votre classe pour le moment.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

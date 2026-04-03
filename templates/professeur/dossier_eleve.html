@@ -1,0 +1,48 @@
+{% extends 'commun/base.html' %}
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--pronote-green); margin-bottom: 20px; padding-bottom: 10px;">
+        <h2 style="margin: 0; color: var(--pronote-green);">Dossier Scolaire : {{ eleve.username }}</h2>
+        <span style="background: #e8f5e9; color: #2e7d32; padding: 5px 15px; border-radius: 20px; font-weight: bold;">{{ eleve.classe_nom }}</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+        <div style="background: #fafafa; padding: 15px; border-radius: 4px; border-left: 4px solid #008148;">
+            <strong>Identifiant système :</strong> #{{ request.path.split('/')[-1] }}<br>
+            <strong>Statut :</strong> Étudiant Actif
+        </div>
+        <div style="background: #fafafa; padding: 15px; border-radius: 4px; border-left: 4px solid #008148;">
+            <strong>Établissement :</strong> Campus GCS2<br>
+            <strong>Année :</strong> 2025-2026
+        </div>
+    </div>
+
+    <h3 style="color: #444; border-bottom: 1px solid #eee; padding-bottom: 5px;">Relevé de notes détaillé</h3>
+    <table style="margin-top: 10px;">
+        <thead>
+            <tr>
+                <th>Discipline</th>
+                <th>Note obtenue</th>
+                <th>Sur</th>
+                <th>Appréciation</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for note in notes %}
+            <tr>
+                <td><strong>{{ note.matiere }}</strong></td>
+                <td style="color: var(--pronote-green); font-weight: bold; font-size: 1.1rem;">{{ note.valeur }}</td>
+                <td>/ 20</td>
+                <td style="color: #666; font-style: italic;">Résultats conformes aux attentes.</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Aucune donnée disponible pour cet étudiant.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+        <a href="{{ url_for('prof_dashboard') }}" style="text-decoration: none; color: #666; font-weight: bold; background: #eee; padding: 10px 20px; border-radius: 4px;">← Retour à la liste des élèves</a>
+    </div>
+</div>
+{% endblock %}

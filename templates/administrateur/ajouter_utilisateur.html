@@ -1,0 +1,46 @@
+{% extends 'commun/base.html' %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <h2 style="color: var(--pronote-green); margin-bottom: 20px;">Ajouter un nouvel utilisateur</h2>
+
+    <div class="card" style="border-left: 5px solid var(--pronote-green);">
+        <form method="POST" style="padding: 15px;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Nom d'utilisateur :</label>
+                <input type="text" name="username" placeholder="Ex: jean.dupont" required 
+                       style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Mot de passe provisoire :</label>
+                <input type="password" name="password" placeholder="Minimum 6 caractères" required 
+                       style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px;">Rôle système :</label>
+                <select name="role_id" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                    <option value="" disabled selected>-- Choisir un rôle --</option>
+                    {% for r in roles %}
+                    <option value="{{ r.id }}">{{ r.nom }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" 
+                    style="width: 100%; background: var(--pronote-green); color: white; border: none; padding: 12px; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 1rem;">
+                Créer le compte
+            </button>
+        </form>
+    </div>
+
+    <div style="margin-top: 20px; text-align: center;">
+        <a href="{{ url_for('admin_dashboard') }}" style="text-decoration: none; color: #666; font-size: 0.9rem;">
+            Annuler et retourner au tableau de bord
+        </a>
+    </div>
+</div>
+{% endblock %}

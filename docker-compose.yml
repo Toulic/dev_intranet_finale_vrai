@@ -1,0 +1,30 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER} 
+      - MYSQL_PASSWORD=${DB_PASSWORD} 
+      - TZ=Europe/Paris
+    expose:
+      - "3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  app: 
+    build: .
+    container_name: pronote_app_secu
+    env_file:
+      - .env 
+    ports:
+      - "6767:5000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+
+volumes:
+  db_data:

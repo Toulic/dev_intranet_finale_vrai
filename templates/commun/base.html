@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRONOTE - GCS2 Académique</title>
+    <style>
+        :root {
+            --pronote-green: #008148;
+            --pronote-dark: #333;
+            --pronote-light: #f0f0f0;
+            --pronote-border: #ccc;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: var(--pronote-light); display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Sidebar */
+        .sidebar { width: 220px; background: var(--pronote-green); color: white; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; font-weight: bold; font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .nav-links { flex: 1; padding: 10px 0; }
+        .nav-links a { display: block; padding: 12px 20px; color: white; text-decoration: none; transition: 0.3s; border-left: 4px solid transparent; }
+        .nav-links a:hover { background: rgba(255,255,255,0.1); border-left: 4px solid white; }
+        
+        /* Main Container */
+        .main-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .top-bar { height: 60px; background: white; border-bottom: 1px solid var(--pronote-border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .content { padding: 30px; }
+        
+        /* Cards & Tables */
+        .card { background: white; border: 1px solid var(--pronote-border); border-radius: 4px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .card-header { border-bottom: 2px solid var(--pronote-green); margin-bottom: 15px; padding-bottom: 5px; font-weight: bold; color: var(--pronote-green); text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; }
+        table th, table td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
+        table th { background: #fafafa; }
+        
+        .btn-logout { color: #ff4d4d; text-decoration: none; font-weight: bold; }
+        /* Style de base pour toutes les alertes */
+        .alert { 
+            padding: 15px; 
+            margin-bottom: 20px; 
+            border-radius: 4px; 
+            border: 1px solid;
+            font-weight: 500;
+        }
+
+        /* Couleur Verte si c'est un succès */
+        .alert-success { 
+            background-color: #d4edda; 
+            color: #155724; 
+            border-color: #c3e6cb; 
+        }
+
+        /* Couleur Rouge si c'est une erreur (ancien style par défaut) */
+        .alert-danger, .alert-error { 
+            background-color: #f8d7da; 
+            color: #721c24; 
+            border-color: #f5c6cb; 
+        }
+    </style>
+</head>
+
+<script>
+function checkNotifications() {
+    fetch('/api/notifications')
+        .then(response => response.json())
+        .then(data => {
+            const badge = document.getElementById('notification-badge');
+            if (badge) {
+                if (data.unread_count > 0) {
+                    badge.textContent = data.unread_count;
+                    badge.style.display = 'inline-block'; // Affiche si > 0
+                } else {
+                    badge.style.display = 'none'; // Cache si 0
+                }
+            }
+        })
+        .catch(err => console.error('Erreur notifications:', err));
+}
+
+// On vérifie toutes les 10 secondes (10000 ms)
+setInterval(checkNotifications, 10000);
+// On vérifie aussi une fois au chargement
+document.addEventListener('DOMContentLoaded', checkNotifications);
+</script>
+
+<body>
+    {% if session.get('user') %}
+    <div class="sidebar">
+        <div class="sidebar-header">PRONOTE</div>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}">Accueil</a>
+            
+            {% if session.get('role') == 'Étudiant' %}
+                <a href="{{ url_for('student_dashboard') }}">Notes & Résultats</a>
+            {% endif %}
+            
+            {% if session.get('role') == 'Professeur' %}
+                <a href="{{ url_for('prof_dashboard') }}">Saisie des notes</a>
+            {% endif %}
+
+            {% if session.get('role') == 'Administrateur' %}
+                <a href="{{ url_for('admin_dashboard') }}">Administration</a>
+            {% endif %}
+            
+            <a href="{{ url_for('schedule') }}">Emploi du temps</a>
+            <a href="{{ url_for('messagerie') }}">Messagerie</a>
+            <a href="{{ url_for('profil') }}" class="nav-link">Mon Profil</a>
+            {% if session.get('role') == 'Etudiant' %}
+                    <a class="nav-link" href="{{ url_for('mes_cours') }}">Mes Cours</a>
+            {% endif %}
+            {% if session.get('role') == 'Professeur' %}
+                <a href="{{ url_for('prof_dashboard') }}">Saisie des Notes</a>
+                
+                <a href="{{ url_for('page_depot_cours') }}">Déposer un Cours</a>
+            {% endif %}
+            {% if session.get('role') == 'Administrateur' %}
+                <a href="{{ url_for('admin_dashboard') }}">Tableau de bord</a>
+                
+                <a href="{{ url_for('admin_gestion_cours') }}">Gestion des cours</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="main-container">
+        {% if session.get('user') %}
+        <div class="top-bar">
+            <div><strong>Session :</strong> {{ session.get('role') }}</div>
+            <div>
+                <span>Utilisateur : <strong>{{ session.get('user') }}</strong></span>
+                <a href="{{ url_for('logout') }}" class="btn-logout" style="margin-left: 20px;">Quitter</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+</html>
